@@ -1,0 +1,45 @@
+name: echo
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  sstun: 'stunserver.stunprotocol.org'
+
+jobs:
+  echo:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Initialize Environment
+        run: |
+          sudo -E apt-get update
+          sudo -E apt-get -y install g++ make libboost-dev libssl-dev build-essential git libssl1.1
+          cd /opt && git clone https://github.com/jselbie/stunserver.git && cd stunserver && make
+
+      - name: Test
+        run: |
+          /opt/stunserver/stuntestcode
+
+      - name: IPv4 UDP
+        run: |
+          /opt/stunserver/stunclient --mode full --localport 34567 --family 4 --protocol udp $sstun 3478
+
+      - name: IPv4 TCP
+        run: |
+          /opt/stunserver/stunclient --mode full --localport 34567 --family 4 --protocol tcp $sstun 3478
+
+      - name: IPv6 UDP
+        run: |
+          /opt/stunserver/stunclient --mode full --localport 34567 --family 6 --protocol udp $sstun 3478
+
+      - name: IPv6 TCP
+        run: |
+          /opt/stunserver/stunclient --mode full --localport 34567 --family 6 --protocol tcp $sstun 3478
+
