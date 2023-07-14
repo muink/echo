@@ -43,3 +43,11 @@ jobs:
         run: |
           /opt/stunserver/stunclient --mode full --localport 34567 --family 6 --protocol tcp $sstun 3478
 
+      - name: Get IPv4 Addr
+        run: |
+          dig +short myip.opendns.com @resolver1.opendns.com
+
+      - name: Get IPv6 Addr
+        run: |
+          dig +short -6 myip.opendns.com aaaa @resolver1.ipv6-sandbox.opendns.com
+
