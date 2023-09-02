@@ -3,6 +3,8 @@ name: echo
 on:
   workflow_dispatch:
 
+  push:
+
 permissions:
   contents: read
   id-token: write
@@ -12,42 +14,30 @@ env:
 
 jobs:
   echo:
-    runs-on: ubuntu-20.04
+    name: Test ${{ matrix.target[0] }}-${{ matrix.target[1] }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - ['ipq806x', 'generic']
+          - ['ath79', 'nand']
+          - ['x86', '64']
+        include:
+          - target: ['ath79', 'nand']
+            profile: netgear_wndr4300
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Initialize Environment
+      - name: Generate full target name
+        env:
+          TARGET: ${{ format('{0}-{1}', matrix.target[0], matrix.target[1]) }}
         run: |
-          sudo -E apt-get update
-          sudo -E apt-get -y install g++ make libboost-dev libssl-dev build-essential git libssl1.1
-          cd /opt && git clone https://github.com/jselbie/stunserver.git && cd stunserver && make
+          echo "Full target name is $TARGET"
+          echo "TARGET=$TARGET" >> $GITHUB_ENV
 
       - name: Test
+        env:
+          ARCH: ${{ format('{0}-{1}', env.TARGET, matrix.profile) }}
         run: |
-          /opt/stunserver/stuntestcode
-
-      - name: IPv4 UDP
-        run: |
-          /opt/stunserver/stunclient --mode full --localport 34567 --family 4 --protocol udp $sstun 3478
-
-      - name: IPv4 TCP
-        run: |
-          /opt/stunserver/stunclient --mode full --localport 34567 --family 4 --protocol tcp $sstun 3478
-
-      - name: IPv6 UDP
-        run: |
-          /opt/stunserver/stunclient --mode full --localport 34567 --family 6 --protocol udp $sstun 3478
-
-      - name: IPv6 TCP
-        run: |
-          /opt/stunserver/stunclient --mode full --localport 34567 --family 6 --protocol tcp $sstun 3478
-
-      - name: Get IPv4 Addr
-        run: |
-          dig +short myip.opendns.com @resolver1.opendns.com
-
-      - name: Get IPv6 Addr
-        run: |
-          dig +short -6 myip.opendns.com aaaa @resolver1.ipv6-sandbox.opendns.com
-
+          echo $ARCH
