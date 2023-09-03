@@ -29,6 +29,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Import keys
+        shell: bash
+        run: |
+          # usign
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "JSON_RESPONSE<<$EOF" >> "$GITHUB_ENV"
+          { echo 1; echo 22; echo 333; } >> "$GITHUB_ENV"
+          echo "$EOF" >> "$GITHUB_ENV"
+
       - name: Generate full target name
         env:
           TARGET: ${{ format('{0}-{1}', matrix.target[0], matrix.target[1]) }}
@@ -41,3 +50,5 @@ jobs:
           ARCH: ${{ format('{0}-{1}', env.TARGET, matrix.profile) }}
         run: |
           echo $ARCH
+          #echo "${{ vars.USIGN_PUBKEY }}"
+          echo "$JSON_RESPONSE"
