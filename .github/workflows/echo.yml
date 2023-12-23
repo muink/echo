@@ -32,6 +32,11 @@ jobs:
       - name: Import keys
         shell: bash
         run: |
+          echo '{"test":true}' | jq
+
+      - name: Import keys
+        shell: bash
+        run: |
           # usign
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           echo "JSON_RESPONSE<<$EOF" >> "$GITHUB_ENV"
