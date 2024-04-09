@@ -14,46 +14,17 @@ env:
 
 jobs:
   echo:
-    name: Test ${{ matrix.target[0] }}-${{ matrix.target[1] }}
+    name: Test IP
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        target:
-          - ['ipq806x', 'generic']
-          - ['ath79', 'nand']
-          - ['x86', '64']
-        include:
-          - target: ['ath79', 'nand']
-            profile: netgear_wndr4300
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Import keys
-        shell: bash
+      - name: Get IPv4 Addr
         run: |
-          echo '{"test":true}' | jq
+          dig +short myip.opendns.com @resolver1.opendns.com
 
-      - name: Import keys
-        shell: bash
+      - name: Get IPv6 Addr
         run: |
-          # usign
-          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-          echo "JSON_RESPONSE<<$EOF" >> "$GITHUB_ENV"
-          { echo 1; echo 22; echo 333; } >> "$GITHUB_ENV"
-          echo "$EOF" >> "$GITHUB_ENV"
+          dig +short -6 myip.opendns.com aaaa @resolver1.ipv6-sandbox.opendns.com
 
-      - name: Generate full target name
-        env:
-          TARGET: ${{ format('{0}-{1}', matrix.target[0], matrix.target[1]) }}
-        run: |
-          echo "Full target name is $TARGET"
-          echo "TARGET=$TARGET" >> $GITHUB_ENV
-
-      - name: Test
-        env:
-          ARCH: ${{ format('{0}-{1}', env.TARGET, matrix.profile) }}
-        run: |
-          echo $ARCH
-          #echo "${{ vars.USIGN_PUBKEY }}"
-          echo "$JSON_RESPONSE"
