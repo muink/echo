@@ -14,17 +14,17 @@ env:
 
 jobs:
   echo:
-    name: Test IP
+    name: Test disk
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Get IPv4 Addr
+      - name: lsblk
         run: |
-          dig +short myip.opendns.com @resolver1.opendns.com
+          lsblk
 
-      - name: Get IPv6 Addr
+      - name: df
         run: |
-          dig +short -6 myip.opendns.com aaaa @resolver1.ipv6-sandbox.opendns.com
+          df -h
 
