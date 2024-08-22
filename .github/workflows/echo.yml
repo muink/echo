@@ -18,13 +18,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: lsblk
+      - name: Initialize Environment
         run: |
-          lsblk
+          sudo -E apt-get update
+          sudo -E apt-get -y install golang
+          cd /opt && git clone https://github.com/gomarkdown/mdtohtml.git && cd mdtohtml && go install
+          echo 'export PATH="$HOME/go/bin:$PATH"' >> "$HOME/.profile"
+          echo 'export PATH="$HOME/go/bin:$PATH"' >> "$HOME/.bashrc"
 
-      - name: df
+      - name: Test
+        shell: bash
         run: |
-          df -h
+          cat "$HOME/.bashrc"
+          mdtohtml -h
 
